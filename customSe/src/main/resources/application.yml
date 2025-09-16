@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: Project_Management
+  datasource:
+    url: jdbc:postgresql://localhost:5432/security_test
+    username: postgres
+    password: 1234
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: aaabhi8888@gmail.com
+    password:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+app:
+  jwt-secret: JWTSecretKey
+  jwt-expiration-milliseconds: 60480000
+  cors:
+    allowed-origins: "http://localhost:3000,http://your-production-domain.com"
+  session:
+    creation-policy: IF_REQUIRED
+    max-sessions: 1
+    prevent-new-login: true
+
+logging:
+  level:
+    root: INFO
+    com.example.customSe: DEBUG
+
+otp:
+  channel: APP
+#server:
+#  forward-headers-strategy: native
