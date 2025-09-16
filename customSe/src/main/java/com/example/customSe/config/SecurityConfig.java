@@ -7,7 +7,7 @@ import com.example.customSe.security.AuthProvider.OTPAuthenticationProvider;
 import com.example.customSe.security.AuthProvider.PasswordAuthenticationProvider;
 import com.example.customSe.security.auth.CustomAccessDeniedHandler;
 import com.example.customSe.security.auth.CustomAuthenticationEntryPoint;
-import com.example.customSe.security.filter.RateLimitingFilter;
+//import com.example.customSe.security.filter.RateLimitingFilter;
 import com.example.customSe.security.manager.CustomAuthenticationManager;
 import com.example.customSe.service.CustomUserDetailsService;
 import com.example.customSe.service.OtpService;
@@ -92,8 +92,6 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authenticationManager(authenticationManager());  // Inject your custom manager
-        XorCsrfTokenRequestAttributeHandler requestHandler = new XorCsrfTokenRequestAttributeHandler();
-        requestHandler.setCsrfRequestAttributeName("_csrf");  //
         return http
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
@@ -106,10 +104,8 @@ public class SecurityConfig {
 //                .sessionManagement(session -> session
 //                        .maximumSessions(1) // only 1 session per user
 //                )
-                .csrf(csrf -> csrf
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                        .csrfTokenRequestHandler(requestHandler)
-                ).authorizeHttpRequests(auth -> auth
+                .csrf(csrf->csrf.disable())
+                .authorizeHttpRequests(auth -> auth
 
                         .requestMatchers("/api/roles/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/signup", "/api/auth/signin").permitAll()
@@ -119,33 +115,6 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception
                         .accessDeniedHandler(customAccessDeniedHandler)
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
-                )
-                .headers(headers -> headers
-                                .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny)
-                                .cacheControl(HeadersConfigurer.CacheControlConfig::disable // Disable default cache headers
-                                )
-                                .contentSecurityPolicy(csp -> csp
-                                        .policyDirectives("default-src 'self'; script-src 'self'")
-                                        .policyDirectives("default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; report-uri /csp-report-endpoint")
-
-                                )
-                                .referrerPolicy(referrer -> referrer
-                                        .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER)
-                                )
-                                .xssProtection(HeadersConfigurer.XXssConfig::disable)
-                                .addHeaderWriter(new CompositeHeaderWriter(List.of(
-                                        new StaticHeadersWriter("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate"),
-                                        new StaticHeadersWriter("Pragma", "no-cache"),
-                                        new StaticHeadersWriter("X-Content-Type-Options", "nosniff"),
-                                        new StaticHeadersWriter("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=(), usb=(), fullscreen=(), accelerometer=(), gyroscope=()")
-                                )))
-//                        .addHeaderWriter(new StaticHeadersWriter("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate"))
-//                        .addHeaderWriter(new StaticHeadersWriter("Pragma", "no-cache"))
-//                        .addHeaderWriter(new StaticHeadersWriter("X-Content-Type-Options", "nosniff"))
-//                        .addHeaderWriter(new StaticHeadersWriter(
-//                                "Permissions-Policy",
-//                                "camera=(), microphone=(), geolocation=(), payment=(), usb=(), fullscreen=(), accelerometer=(), gyroscope=()"
-//                        ))
                 )
 
                 .sessionManagement(session -> session
@@ -188,20 +157,19 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
 
     }
-
-    @Bean
-    public FilterRegistrationBean<RateLimitingFilter> rateLimitFilter() {
-        FilterRegistrationBean<RateLimitingFilter> registration = new FilterRegistrationBean<>();
-        registration.setFilter(new RateLimitingFilter());
-
-        // Apply only to login and OTP endpoints
-        registration.addUrlPatterns("/api/auth/signin", "/api/auth/verify-otp");
-
-        // Optional: Adjust execution order relative to other filters
-        registration.setOrder(2);
-
-        return registration;
-    }
+//    @Bean
+//    public FilterRegistrationBean<RateLimitingFilter> rateLimitFilter() {
+//        FilterRegistrationBean<RateLimitingFilter> registration = new FilterRegistrationBean<>();
+//        registration.setFilter(new RateLimitingFilter());
+//
+//        // Apply only to login and OTP endpoints
+//        registration.addUrlPatterns("/api/auth/signin", "/api/auth/verify-otp");
+//
+//        // Optional: Adjust execution order relative to other filters
+//        registration.setOrder(2);
+//
+//        return registration;
+//    }
 
 
 }
